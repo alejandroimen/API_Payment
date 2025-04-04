@@ -1,16 +1,15 @@
 package routes
 
 import (
-	"github.com/alejandroimen/API_Payment.git/MercadoPago/infrastructure/controllers"
+	"github.com/alejandroimen/API_Payment/MercadoPago/infrastructure/controllers"
 	"github.com/gin-gonic/gin"
-	"os"
 )
 
 func SetupRoutes(
 	engine *gin.Engine,
-	createSoapController *controllers.
+	payController *controllers.PayController,
 ) {
 
 	// Grupo de rutas públicas ( cambiar despues a protegidas porfa)
-	engine.POST("/pay", createSoapController.Handle)
+	engine.POST("/pay", payController.Handle)
 }

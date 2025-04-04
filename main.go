@@ -1,10 +1,11 @@
-package main 
+package main
 
 import (
 	"log"
-	mp_infra "github.com/alejandroimen/API_Payment.git/MercadoPago/infrastructure"	
 
-	"github.com/alejandroimen/API_Payment.git/helpers"	
+	mp_infra "github.com/alejandroimen/API_Payment/MercadoPago/infrastructure"
+
+	"github.com/alejandroimen/API_Payment/helpers"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,4 +19,7 @@ func main() {
 	engine.Use(helpers.SetupCORS())
 
 	mp_infra.InitMpDependencies(engine, cfg)
+
+	engine.Run(":8000")
+
 }

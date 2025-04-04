@@ -1,4 +1,4 @@
-module github.com/alejandroimen/API_Payment.git
+module github.com/alejandroimen/API_Payment
 
 go 1.24.1
 
