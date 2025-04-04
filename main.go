@@ -1,38 +1,25 @@
 package main
 
 import (
-	"context"
-	"fmt"
+	"log"
 
-	"github.com/mercadopago/sdk-go/pkg/config"
-	"github.com/mercadopago/sdk-go/pkg/payment"
+	mp_infra "github.com/alejandroimen/API_Payment/MercadoPago/infrastructure"
+
+	"github.com/alejandroimen/API_Payment/helpers"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	accessToken := "{{ACCESS_TOKEN}}"
-
-	cfg, err := config.New(accessToken)
+	cfg, err := helpers.NewMercadoPagoSDK()
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatalf("Error inicializando la conexión a MySQL: %v", err)
 	}
 
-	client := payment.NewClient(cfg)
+	engine := gin.Default()
+	engine.Use(helpers.SetupCORS())
 
-	request := payment.Request{
-		TransactionAmount: 105.1,
-		Payer: &payment.PayerRequest{
-			Email: "{{EMAIL}}",
-		},
-		Token:        "{{CARD_TOKEN}}",
-		Installments: 1,
-	}
+	mp_infra.InitMpDependencies(engine, cfg)
 
-	resource, err := client.Create(context.Background(), request)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	engine.Run(":8000")
 
-	fmt.Println(resource)
 }
