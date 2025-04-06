@@ -1,46 +1,55 @@
 package controllers
 
 import (
-	"log"
+    "log"
+    "net/http"
 
-	"github.com/alejandroimen/API_Payment/MercadoPago/application"
-	"github.com/gin-gonic/gin"
+    "github.com/alejandroimen/API_Payment/MercadoPago/application"
+    "github.com/gin-gonic/gin"
 )
 
 type PayController struct {
-	pay *application.Pay
+    payUseCase *application.Pay
 }
 
-func NewPayController(pay *application.Pay) *PayController {
-	return &PayController{pay: pay}
+func NewPayController(payUseCase *application.Pay) *PayController {
+    return &PayController{payUseCase: payUseCase}
 }
 
 func (c *PayController) Handle(ctx *gin.Context) {
-	log.Println("Recibe la petición para crear un jabón")
+    // Modificar la estructura de datos esperada para incluir `payer`
+    var req struct {
+        Payer struct {
+            Email string `json:"email"`
+        } `json:"payer"`
+        Token string `json:"token"`
+    }
 
-	var request struct {
-		TransactionAmount float32 `json:"transaction_amount"`
-		Email             string  `json:"email"`
-		Token             string  `json:"token"`
-		Installments      int16   `json:"installments"`
-	}
+    // Intentar enlazar el cuerpo JSON con la estructura
+    if err := ctx.ShouldBindJSON(&req); err != nil {
+        log.Println("Error decodificando el cuerpo:", err)
+        ctx.JSON(http.StatusBadRequest, gin.H{"message": "Cuerpo de la solicitud inválido"})
+        return
+    }
 
-	if err := ctx.ShouldBindJSON(&request); err != nil {
-		log.Printf("Error decodificando el cuerpo de la solicitud: %v", err)
-		ctx.JSON(400, gin.H{"error": "cuerpo de la solicitud inválido"})
-		return
-	}
+    // Extraer el email del subcampo `payer`
+    email := req.Payer.Email
+    token := req.Token
 
-	log.Printf("Creando pago: Monto=%f, Email=%s, Token=%s, Installment=%d",
-		request.TransactionAmount, request.Email, request.Token, request.Installments)
+    log.Printf("Solicitud recibida: Email=%s, Token=%s", email, token)
 
-	pay, err := c.pay.Run(request.TransactionAmount, request.Email, request.Token, request.Installments); 
-	if err != nil {
-		log.Printf("Error creando el jabón: %v", err)
-		ctx.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
+    // Pasar los datos al caso de uso
+    resp, err := c.payUseCase.Run(email, token)
+    if err != nil {
+        log.Println("Error ejecutando el caso de uso:", err)
+        ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+        return
+    }
 
-	log.Println("Paguito hecho unu", pay)
-	ctx.JSON(201, gin.H{"message": "pago realizado exitosamente"})
+    log.Println("Respuesta del caso de uso:", resp)
+
+    ctx.JSON(http.StatusCreated, gin.H{
+        "message": "Pago realizado con éxito",
+        "cuerpo":  resp,
+    })
 }

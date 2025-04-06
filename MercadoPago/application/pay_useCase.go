@@ -1,30 +1,32 @@
 package application
 
 import (
-	"github.com/alejandroimen/API_Payment/MercadoPago/domain/entities"
-	"github.com/alejandroimen/API_Payment/MercadoPago/domain/repository"
-	"github.com/mercadopago/sdk-go/pkg/payment"
+    "log"
+    "github.com/alejandroimen/API_Payment/MercadoPago/domain/entities"
+    "github.com/alejandroimen/API_Payment/MercadoPago/domain/repository"
 )
 
 type Pay struct {
-	repo repository.PayRepoMP
+    repo repository.PayRepo
 }
 
-func NewPay(repo repository.PayRepoMP) *Pay {
-	return &Pay{repo: repo}
+func NewPay(repo repository.PayRepo) *Pay {
+    return &Pay{repo: repo}
 }
 
-func (p *Pay) Run(transactionAmount float32, email string, token string, installments int16) (*payment.Response, error) {
-	data := entities.DataPayment{
-		TransactionAmount: transactionAmount,
-		Email:             email,
-		Token:             token,
-		Installments:      installments,
-	}
+func (p *Pay) Run(email string, token string) (interface{}, error) {
+    data := entities.Payment{
+        PayerEmail: email,
+        Token:      token,
+        PlanID:     "Plan mensual",
+        Amount:     100.0,
+        Currency:   "MXN",
+    }
+    log.Printf("Solicitud recibida: Email=%s, Token=%s", data.PayerEmail, data.Token)
 
-	Pay, err := p.repo.ProccessPayment(data)
-	if err != nil {
-		return nil, err
-	}
-	return Pay, nil
+    result, err := p.repo.CreatePayment(data)
+    if err != nil {
+        return nil, err
+    }
+    return result, nil
 }
