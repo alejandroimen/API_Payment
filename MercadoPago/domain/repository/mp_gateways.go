@@ -1,11 +1,7 @@
 package repository
 
-import (
-	entities "github.com/alejandroimen/API_Payment/MercadoPago/domain/entities"
-	"github.com/mercadopago/sdk-go/pkg/payment"
+import "github.com/alejandroimen/API_Payment/MercadoPago/domain/entities"
 
-)
-
-type PayRepoMP interface {
-	ProccessPayment(data entities.DataPayment) (*payment.Response, error)
+type PayRepo interface {
+    CreatePayment(payment entities.Payment) (interface{}, error)
 }

@@ -1,26 +1,18 @@
 package infrastructure
 
 import (
-	"github.com/mercadopago/sdk-go/pkg/config"
-
-	app_mp "github.com/alejandroimen/API_Payment/MercadoPago/application"
-	control_mp "github.com/alejandroimen/API_Payment/MercadoPago/infrastructure/controllers"
-	repo_mp "github.com/alejandroimen/API_Payment/MercadoPago/infrastructure/repository"
-	routes_mp "github.com/alejandroimen/API_Payment/MercadoPago/infrastructure/routes"
-	"github.com/gin-gonic/gin"
+    "github.com/alejandroimen/API_Payment/MercadoPago/application"
+    "github.com/alejandroimen/API_Payment/MercadoPago/infrastructure/controllers"
+    "github.com/alejandroimen/API_Payment/MercadoPago/infrastructure/repository"
+    "github.com/alejandroimen/API_Payment/MercadoPago/infrastructure/routes"
+    "github.com/gin-gonic/gin"
+    "github.com/mercadopago/sdk-go/pkg/config"
 )
 
 func InitMpDependencies(engine *gin.Engine, cfg *config.Config) {
+    repo := repository.NewPayRepoMP(cfg) // Ahora se pasa cfg al repositorio
+    useCase := application.NewPay(repo)
+    controller := controllers.NewPayController(useCase)
 
-	mpRepo := repo_mp.NewPayRepoMP(cfg)
-
-	creatempUseCase := app_mp.NewPay(mpRepo)
-
-	creatempController := control_mp.NewPayController(creatempUseCase)
-
-	routes_mp.SetupRoutes(
-		engine,
-		creatempController,
-	)
-
+    routes.SetupRoutes(engine, controller)
 }
