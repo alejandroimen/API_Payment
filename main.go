@@ -37,7 +37,7 @@ func main() {
     mp_infra.InitMpDependencies(engine, cfg)
 
     // Iniciar el servidor en el puerto 8000
-    if err := engine.Run(":8000"); err != nil {
+    if err := engine.Run(":8010"); err != nil {
         log.Fatalf("Error al iniciar el servidor: %v", err)
     }
 }
